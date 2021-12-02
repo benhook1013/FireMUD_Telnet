@@ -9,21 +9,21 @@ import FireEngine_Telnet.client_io.exception.ClientConnectionException;
  *
  * @author Ben Hook
  */
-public interface ClientConnection {
+public interface ClientConnectionInterface {
 	/**
-	 * Called from Session, this asks the ClientConnection to do any first-time
+	 * Called from Session, this asks the ClientConnectionInterface to do any first-time
 	 * setup ready to start accepting player input.
 	 * 
-	 * @param sess Session that was created for this ClientConnection, that is
-	 *             asking the ClientConnection to set itself up
+	 * @param sess Session that was created for this ClientConnectionInterface, that is
+	 *             asking the ClientConnectionInterface to set itself up
 	 * @throws ClientConnectionException an exception generated during
-	 *                                   ClientConnection setup
+	 *                                   ClientConnectionInterface setup
 	 */
 	// public void setupConnection(Session sess) throws ClientConnectionException;
 	public void setupConnection() throws ClientConnectionException;
 
 	/**
-	 * Write output for the client from the game, to the ClientConnection.
+	 * Write output for the client from the game, to the ClientConnectionInterface.
 	 * 
 	 * @param output output object to be written to the client
 	 * @param ansi   whether to colour the output or not
@@ -31,19 +31,19 @@ public interface ClientConnection {
 	public void writeToConnection(ClientConnectionOutput output, boolean ansi);
 
 	/**
-	 * Set the ClientConnection into accepting mode for client input.
+	 * Set the ClientConnectionInterface into accepting mode for client input.
 	 */
 	public void acceptInput();
 
 	/**
-	 * Set the ClientConnection into refusing mode for client input. Note that the
+	 * Set the ClientConnectionInterface into refusing mode for client input. Note that the
 	 * SocketChannel and Selector will still receive client input, but will just
 	 * throw it away.
 	 */
 	public void refuseInput();
 
 	/**
-	 * Used by {@link Session} to read client input from ClientConnection.
+	 * Used by {@link Session} to read client input from ClientConnectionInterface.
 	 * 
 	 * @return String of client input
 	 */
@@ -51,20 +51,20 @@ public interface ClientConnection {
 
 	/**
 	 * Used when Session is ready to shutdown, but allows any remaining queued text
-	 * to be sent to client inside ClientConnection.
+	 * to be sent to client inside ClientConnectionInterface.
 	 * 
 	 * <p>
 	 * Note that {@link #refuseInput()} is expected to have already been called
 	 * before {@link #shutdown()}. Once all output text has been send to the client,
-	 * the ClientConnection needs to {@link Session#notifyCconShutdown()} to let the
+	 * the ClientConnectionInterface needs to {@link Session#notifyCconShutdown()} to let the
 	 * Session know that all pending IO is done and can close cleanly.
 	 * </p>
 	 */
 	public void shutdown();
 
 	/**
-	 * Tells the ClientConnection to close any underlying IO and clean up. The
-	 * ClientConnection should not be written to, or attempted to be read from,
+	 * Tells the ClientConnectionInterface to close any underlying IO and clean up. The
+	 * ClientConnectionInterface should not be written to, or attempted to be read from,
 	 * after this has been called.
 	 */
 	public void close();

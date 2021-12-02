@@ -12,7 +12,7 @@ import FireEngine_Telnet.client_io.exception.ClientConnectionException;
 import FireEngine_Telnet.main.FireEngineMain;
 import FireEngine_Telnet.util.MyLogger;
 
-public class ClientConnectionTelnet implements ClientConnection {
+public class ClientConnectionTelnet implements ClientConnectionInterface {
 	private ClientConnectionTelnet ccon;
 	private ClientIOTelnet telnet;
 	private final SocketChannel sc;
