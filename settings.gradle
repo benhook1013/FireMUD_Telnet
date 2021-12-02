@@ -8,4 +8,4 @@
  */
 
 rootProject.name = 'FireEngine_ClientAPI'
-//include('lib')
+//include('app')
