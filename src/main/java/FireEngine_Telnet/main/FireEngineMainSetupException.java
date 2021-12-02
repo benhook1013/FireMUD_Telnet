@@ -1,4 +1,4 @@
-package FireEngine_Telnet.main;
+package fireengine_telnet.main;
 
 /**
  * An exception thrown representing various problems during setup.

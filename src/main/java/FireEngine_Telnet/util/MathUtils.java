@@ -1,4 +1,4 @@
-package FireEngine_Telnet.util;
+package fireengine_telnet.util;
 
 /**
  * Class containing custom/toolbox type math related functions.

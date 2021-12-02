@@ -1,6 +1,6 @@
-package FireEngine_Telnet.client_io;
+package fireengine_telnet.client_io;
 
-import FireEngine_Telnet.client_io.exception.ClientConnectionException;
+import fireengine_telnet.client_io.exception.ClientConnectionException;
 
 /**
  * Interface for client IO/connection. Depending on implementation, may be
@@ -11,15 +11,12 @@ import FireEngine_Telnet.client_io.exception.ClientConnectionException;
  */
 public interface ClientConnectionInterface {
 	/**
-	 * Called from Session, this asks the ClientConnectionInterface to do any first-time
-	 * setup ready to start accepting player input.
+	 * Asks the ClientConnectionInterface to do any first-time setup, ready to start
+	 * accepting player input.
 	 * 
-	 * @param sess Session that was created for this ClientConnectionInterface, that is
-	 *             asking the ClientConnectionInterface to set itself up
 	 * @throws ClientConnectionException an exception generated during
 	 *                                   ClientConnectionInterface setup
 	 */
-	// public void setupConnection(Session sess) throws ClientConnectionException;
 	public void setupConnection() throws ClientConnectionException;
 
 	/**
@@ -36,9 +33,9 @@ public interface ClientConnectionInterface {
 	public void acceptInput();
 
 	/**
-	 * Set the ClientConnectionInterface into refusing mode for client input. Note that the
-	 * SocketChannel and Selector will still receive client input, but will just
-	 * throw it away.
+	 * Set the ClientConnectionInterface into refusing mode for client input. Note
+	 * that the SocketChannel and Selector will still receive client input, but will
+	 * just throw it away.
 	 */
 	public void refuseInput();
 
@@ -56,16 +53,16 @@ public interface ClientConnectionInterface {
 	 * <p>
 	 * Note that {@link #refuseInput()} is expected to have already been called
 	 * before {@link #shutdown()}. Once all output text has been send to the client,
-	 * the ClientConnectionInterface needs to {@link Session#notifyCconShutdown()} to let the
-	 * Session know that all pending IO is done and can close cleanly.
+	 * the ClientConnectionInterface needs to {@link Session#notifyCconShutdown()}
+	 * to let the Session know that all pending IO is done and can close cleanly.
 	 * </p>
 	 */
 	public void shutdown();
 
 	/**
-	 * Tells the ClientConnectionInterface to close any underlying IO and clean up. The
-	 * ClientConnectionInterface should not be written to, or attempted to be read from,
-	 * after this has been called.
+	 * Tells the ClientConnectionInterface to close any underlying IO and clean up.
+	 * The ClientConnectionInterface should not be written to, or attempted to be
+	 * read from, after this has been called.
 	 */
 	public void close();
 }

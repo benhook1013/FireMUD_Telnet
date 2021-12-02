@@ -1,12 +1,12 @@
-package FireEngine_Telnet.main;
+package fireengine_telnet.main;
 
 import java.io.IOException;
 import java.util.logging.Level;
 
-import FireEngine_Telnet.client_io.ClientIOTelnet;
-import FireEngine_Telnet.client_io.exception.ClientIOTelnetException;
-import FireEngine_Telnet.util.ConfigLoader;
-import FireEngine_Telnet.util.MyLogger;
+import fireengine_telnet.client_io.ClientIOTelnet;
+import fireengine_telnet.client_io.exception.ClientIOTelnetException;
+import fireengine_telnet.util.ConfigLoader;
+import fireengine_telnet.util.MyLogger;
 
 /**
  * Main Thread; initiates, runs (and later, monitors) the various services.
@@ -28,7 +28,7 @@ public class FireEngineMain {
 	 */
 	public static final int CLIENT_IO_INPUT_MAX_LENGTH = 5000;
 
-	static FireEngine_Telnet.client_io.ClientIOTelnet telnet;
+	static fireengine_telnet.client_io.ClientIOTelnet telnet;
 	static int client_IO_Telnet_Failures = 0;
 	static String telnetAddress;
 	static int telnetPort;

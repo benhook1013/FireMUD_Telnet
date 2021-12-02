@@ -1,4 +1,4 @@
-package FireEngine_Telnet.client_io;
+package fireengine_telnet.client_io;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -172,7 +172,7 @@ public class ClientConnectionOutput {
 				while (iter.hasNext()) {
 					Client_Connection_Output_Line line = iter.next();
 					Collections.reverse(line.partList);
-					for (FireEngine_Telnet.client_io.ClientConnectionOutput.Client_Connection_Output_Line.Client_Connection_Output_Part part : line
+					for (fireengine_telnet.client_io.ClientConnectionOutput.Client_Connection_Output_Line.Client_Connection_Output_Part part : line
 							.getParts()) {
 						this.addPart(part.getText(), part.getColourFG(), part.getColourBG(), true);
 					}
@@ -184,7 +184,7 @@ public class ClientConnectionOutput {
 				Iterator<Client_Connection_Output_Line> iter = copyOutput.lineList.iterator();
 				while (iter.hasNext()) {
 					Client_Connection_Output_Line line = iter.next();
-					for (FireEngine_Telnet.client_io.ClientConnectionOutput.Client_Connection_Output_Line.Client_Connection_Output_Part part : line
+					for (fireengine_telnet.client_io.ClientConnectionOutput.Client_Connection_Output_Line.Client_Connection_Output_Part part : line
 							.getParts()) {
 						this.addPart(part.getText(), part.getColourFG(), part.getColourBG());
 					}

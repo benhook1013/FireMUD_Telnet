@@ -1,8 +1,4 @@
-/*
- * Copyright 2017 Benjamin James Hook
- * ClientIOColour.java
- */
-package FireEngine_Telnet.client_io;
+package fireengine_telnet.client_io;
 
 // Mock-static class.
 public final class ClientIOColour {

@@ -1,4 +1,4 @@
-package FireEngine_Telnet.util;
+package fireengine_telnet.util;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

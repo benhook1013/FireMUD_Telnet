@@ -1,4 +1,4 @@
-package FireEngine_Telnet.client_io;
+package fireengine_telnet.client_io;
 
 import java.io.IOException;
 import java.net.StandardSocketOptions;
@@ -8,9 +8,9 @@ import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.logging.Level;
 
-import FireEngine_Telnet.client_io.exception.ClientConnectionException;
-import FireEngine_Telnet.main.FireEngineMain;
-import FireEngine_Telnet.util.MyLogger;
+import fireengine_telnet.client_io.exception.ClientConnectionException;
+import fireengine_telnet.main.FireEngineMain;
+import fireengine_telnet.util.MyLogger;
 
 public class ClientConnectionTelnet implements ClientConnectionInterface {
 	private ClientConnectionTelnet ccon;
@@ -26,8 +26,6 @@ public class ClientConnectionTelnet implements ClientConnectionInterface {
 	private ArrayList<String> recieveList;
 	private final int RECIEVE_LIMIT = 1000;
 	private StringBuilder sb = new StringBuilder();
-
-	// private Session sess;
 
 	private static final String colourPrefix = "\u001B[";
 	private static final String colourSeperator = ";";

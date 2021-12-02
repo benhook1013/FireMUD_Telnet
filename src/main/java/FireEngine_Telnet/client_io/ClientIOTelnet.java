@@ -1,4 +1,4 @@
-package FireEngine_Telnet.client_io;
+package fireengine_telnet.client_io;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -14,8 +14,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 
-import FireEngine_Telnet.client_io.exception.ClientIOTelnetException;
-import FireEngine_Telnet.util.MyLogger;
+import fireengine_telnet.client_io.exception.ClientIOTelnetException;
+import fireengine_telnet.util.MyLogger;
 
 /**
  * Workhorse of the Telnet IO, a single thread that scales extremely well and
