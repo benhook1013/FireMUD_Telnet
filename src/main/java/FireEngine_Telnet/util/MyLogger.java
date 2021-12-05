@@ -10,10 +10,12 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import fireengine_telnet.main.FireEngineTelnetMain;
+
 /**
  * Wrapper class for custom implementation of {@link Logger}.
  * 
- * TODO Clean this call up once we are comfortable that its acting correctly.
+ * TODO Clean this all up once we are comfortable that its acting correctly.
  *
  * @author Ben Hook
  */
@@ -52,59 +54,6 @@ public class MyLogger {
 			LOGGER.log(Level.SEVERE, "MyLogger: Failed to set formatter or initialise logger level.", e);
 		}
 
-		String configFileLoggerLevel = ConfigLoader.getSetting("loggerLevel");
-
-		if (configFileLoggerLevel == null) {
-			logLevel = Level.INFO;
-			MyLogger.log(Level.SEVERE, "MyLogger: loggerLevel not found in server config file, defaulting to INFO.");
-		} else {
-			switch (configFileLoggerLevel) {
-			case "ALL": {
-				logLevel = Level.ALL;
-				break;
-			}
-			case "CONFIG": {
-				logLevel = Level.CONFIG;
-				break;
-			}
-			case "FINE": {
-				logLevel = Level.FINE;
-				break;
-			}
-			case "FINER": {
-				logLevel = Level.FINER;
-				break;
-			}
-			case "FINEST": {
-				logLevel = Level.FINEST;
-				break;
-			}
-			case "INFO": {
-				logLevel = Level.INFO;
-				break;
-			}
-			case "OFF": {
-				logLevel = Level.OFF;
-				break;
-			}
-			case "SEVERE": {
-				logLevel = Level.SEVERE;
-				break;
-			}
-			case "WARNING": {
-				logLevel = Level.WARNING;
-				break;
-			}
-			default: {
-				logLevel = Level.INFO;
-				MyLogger.log(Level.SEVERE,
-						String.format("MyLogger: Could not parse configFileLoggerLevel '%s', defaulting to INFO.",
-								configFileLoggerLevel));
-				break;
-			}
-			}
-		}
-
 		try {
 //			fileHandler.setLevel(Level.ALL);
 			MyLogger.log(Level.FINE, String.format("MyLogger: Setting log level to %s.", logLevel.toString()));
@@ -118,6 +67,59 @@ public class MyLogger {
 		} catch (SecurityException e) {
 			LOGGER.log(Level.SEVERE, "MyLogger: Failed to set Level.", e);
 		}
+	}
+
+	public static void setLoggingLevel(String newLoggingLevel) {
+		if (newLoggingLevel == null) {
+			instance.logLevel = Level.INFO;
+			MyLogger.log(Level.SEVERE, "MyLogger: loggerLevel not found in server config file, defaulting to INFO.");
+		} else {
+			switch (newLoggingLevel) {
+			case "ALL": {
+				instance.logLevel = Level.ALL;
+				break;
+			}
+			case "CONFIG": {
+				instance.logLevel = Level.CONFIG;
+				break;
+			}
+			case "FINE": {
+				instance.logLevel = Level.FINE;
+				break;
+			}
+			case "FINER": {
+				instance.logLevel = Level.FINER;
+				break;
+			}
+			case "FINEST": {
+				instance.logLevel = Level.FINEST;
+				break;
+			}
+			case "INFO": {
+				instance.logLevel = Level.INFO;
+				break;
+			}
+			case "OFF": {
+				instance.logLevel = Level.OFF;
+				break;
+			}
+			case "SEVERE": {
+				instance.logLevel = Level.SEVERE;
+				break;
+			}
+			case "WARNING": {
+				instance.logLevel = Level.WARNING;
+				break;
+			}
+			default: {
+				instance.logLevel = Level.INFO;
+				MyLogger.log(Level.SEVERE, String.format(
+						"MyLogger: Could not parse configFileLoggerLevel '%s', defaulting to INFO.", newLoggingLevel));
+				break;
+			}
+			}
+		}
+
 	}
 
 	public static void log(Level level, String msg) {
@@ -144,12 +146,11 @@ public class MyLogger {
 			firstLine = firstLine + calcDate(record.getMillis());
 			firstLine = firstLine + "]";
 
-			firstLine = firstLine + " [" + "fireengine log" + "]";
+			firstLine = firstLine + " [" + FireEngineTelnetMain.serverName + "]";
 
 			firstLine = firstLine + " [" + record.getLevel().getName() + "]";
 
 			firstLine = firstLine + " - ";
-//			builder.append(record.getMessage());
 
 			firstLine = firstLine + formatMessage(record);
 			builder.append(firstLine);

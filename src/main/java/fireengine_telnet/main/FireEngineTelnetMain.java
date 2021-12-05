@@ -13,11 +13,12 @@ import fireengine_telnet.util.MyLogger;
  *
  * @author Ben Hook
  */
-public class FireEngineMain {
+public class FireEngineTelnetMain {
 	static volatile boolean running;
 
 	public static String configFilePath;
-	public static String serverName;
+	public static String loggingLevel;
+	public static String serverName = "FireEngine_Telnet";
 
 	/**
 	 * Maximum number of times IO failure is acceptable until server will shutdown.
@@ -37,20 +38,17 @@ public class FireEngineMain {
 	 * @param args File path of config file.
 	 */
 	public static void main(String[] args) {
-		// TODO Log error if no argument
-		configFilePath = args[0];
-
 		try {
-			setUp();
+			setUp(args);
 			try {
 				run();
 			} catch (Exception e) {
-				MyLogger.log(Level.SEVERE, "FireEngineMain: Exception while running app.", e);
+				MyLogger.log(Level.SEVERE, "FireEngineTelnetMain: Exception while running app.", e);
 			} finally {
 				shutdown();
 			}
 		} catch (Exception e) {
-			MyLogger.log(Level.SEVERE, "FireEngineMain: Exception while starting up app.", e);
+			MyLogger.log(Level.SEVERE, "FireEngineTelnetMain: Exception while starting up app.", e);
 			shutdown();
 		}
 	}
@@ -58,34 +56,43 @@ public class FireEngineMain {
 	/**
 	 * Setup the world and start accepting connections.
 	 * 
-	 * @throws FireEngineMainSetupException
+	 * @throws FireEngineSetupException
 	 */
-	private static void setUp() throws FireEngineMainSetupException {
+	private static void setUp(String[] args) throws FireEngineSetupException {
+		int argsLength = args.length;
+		if (argsLength >= 1) {
+			FireEngineTelnetMain.configFilePath = args[0];
+		} else {
+			throw new FireEngineSetupException(
+					"FireEngineTelnetMain: Unable to start FireEngine_Telnet as config file path missing from argument.");
+		}
+
 		try {
 			ConfigLoader.loadSettings(configFilePath);
 		} catch (IOException e) {
-			throw new FireEngineMainSetupException("FireEngineMain: Failed to load config file", e);
+			throw new FireEngineSetupException("FireEngineTelnetMain: Failed to load config file", e);
 		}
 
-		MyLogger.log(Level.INFO, "FireEngineMain: Bootstrapping FireEngine!");
+		MyLogger.log(Level.INFO, "FireEngineTelnetMain: Bootstrapping FireEngine!");
 
-		serverName = "";
-		serverName = ConfigLoader.getSetting("serverName");
-		if (serverName.equals("")) {
-			throw new FireEngineMainSetupException(
-					String.format("FireEngineMain: No property found in config file for: %s", "serverName"));
+		loggingLevel = "";
+		loggingLevel = ConfigLoader.getSetting("loggingLevel");
+		MyLogger.setLoggingLevel(loggingLevel);
+		if (loggingLevel.equals("")) {
+			throw new FireEngineSetupException(
+					String.format("FireEngineTelnetMain: No property found in config file for: %s", "loggingLevel"));
 		}
 		telnetAddress = "";
 		telnetAddress = ConfigLoader.getSetting("serverIP");
 		if (telnetAddress.equals("")) {
-			throw new FireEngineMainSetupException(
-					String.format("FireEngineMain: No property found in config file for: %s", "serverIP"));
+			throw new FireEngineSetupException(
+					String.format("FireEngineTelnetMain: No property found in config file for: %s", "serverIP"));
 		}
 		telnetPort = 0;
 		telnetPort = Integer.parseInt(ConfigLoader.getSetting("telnetPort"));
 		if (telnetPort == 0) {
-			throw new FireEngineMainSetupException(
-					String.format("FireEngineMain: No property found in config file for: %s", "telnetPort"));
+			throw new FireEngineSetupException(
+					String.format("FireEngineTelnetMain: No property found in config file for: %s", "telnetPort"));
 		}
 
 		startClientIOTelnet();
@@ -94,13 +101,13 @@ public class FireEngineMain {
 	/**
 	 * Starts the Telnet thread and starts accepting connections.
 	 *
-	 * @throws FireEngineMainSetupException
+	 * @throws FireEngineSetupException
 	 */
-	private static void startClientIOTelnet() throws FireEngineMainSetupException {
-		MyLogger.log(Level.INFO, "FireEngineMain: Starting Client_IO...");
+	private static void startClientIOTelnet() throws FireEngineSetupException {
+		MyLogger.log(Level.INFO, "FireEngineTelnetMain: Starting Client_IO...");
 
 		if (telnet != null) {
-			MyLogger.log(Level.INFO, "FireEngineMain: Cleaning up old Client_IO.");
+			MyLogger.log(Level.INFO, "FireEngineTelnetMain: Cleaning up old Client_IO.");
 			telnet.clearResources();
 		}
 
@@ -109,14 +116,14 @@ public class FireEngineMain {
 			telnet = new ClientIOTelnet(telnetAddress, telnetPort);
 			telnet.start();
 		} catch (ClientIOTelnetException e) {
-			throw new FireEngineMainSetupException("FireEngineMain: Failed to create and start Client_Telnet_IO.", e);
+			throw new FireEngineSetupException("FireEngineTelnetMain: Failed to create and start Client_Telnet_IO.", e);
 		}
 		while (telnet.getState() != Thread.State.RUNNABLE) {
 			try {
 				Thread.sleep(10);
 			} catch (InterruptedException e) {
 				MyLogger.log(Level.WARNING,
-						"FireEngineMain: Thread interrupted while waiting for ClientIOTelnet to start.", e);
+						"FireEngineTelnetMain: Thread interrupted while waiting for ClientIOTelnet to start.", e);
 				continue;
 			}
 		}
@@ -129,28 +136,28 @@ public class FireEngineMain {
 	 * exception.
 	 */
 	public static void run() {
-		MyLogger.log(Level.INFO, "FireEngineMain: Starting FireEngine...");
+		MyLogger.log(Level.INFO, "FireEngineTelnetMain: Starting FireEngine...");
 		running = true;
 
 		while (running) {
-			MyLogger.log(Level.FINEST, "FireEngineMain: Running main thread loop...");
+			MyLogger.log(Level.FINEST, "FireEngineTelnetMain: Running main thread loop...");
 
 			if (!telnet.isAlive()) {
 				MyLogger.log(Level.SEVERE,
-						"FireEngineMain: ClientIOTelnet thread stopped without being asked to stop.");
+						"FireEngineTelnetMain: ClientIOTelnet thread stopped without being asked to stop.");
 				client_IO_Telnet_Failures++;
 				if (client_IO_Telnet_Failures > CLIENT_IO_FAILURE_LIMIT) {
 					MyLogger.log(Level.SEVERE,
-							"FireEngineMain: ClientIOTelnet thread has stopped unexpectedly too many times, shutting down.");
+							"FireEngineTelnetMain: ClientIOTelnet thread has stopped unexpectedly too many times, shutting down.");
 					stop();
 					break;
 				} else {
-					MyLogger.log(Level.SEVERE, "FireEngineMain: Restarting ClientIOTelnet.");
+					MyLogger.log(Level.SEVERE, "FireEngineTelnetMain: Restarting ClientIOTelnet.");
 					try {
 						startClientIOTelnet();
-					} catch (FireEngineMainSetupException e) {
+					} catch (FireEngineSetupException e) {
 						MyLogger.log(Level.SEVERE,
-								"FireEngineMain: Error while trying to restart ClientIOTelnet, shutting down.", e);
+								"FireEngineTelnetMain: Error while trying to restart ClientIOTelnet, shutting down.", e);
 						stop();
 						break;
 					}
@@ -160,7 +167,7 @@ public class FireEngineMain {
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
-				MyLogger.log(Level.INFO, "FireEngineMain: Main thread running loop sleep interrupted.", e);
+				MyLogger.log(Level.INFO, "FireEngineTelnetMain: Main thread running loop sleep interrupted.", e);
 			}
 			// stop();
 			// break;
@@ -180,11 +187,11 @@ public class FireEngineMain {
 	 * application.
 	 */
 	private static void shutdown() {
-		MyLogger.log(Level.INFO, "FireEngineMain: Starting FireEngine shutdown.");
+		MyLogger.log(Level.INFO, "FireEngineTelnetMain: Starting FireEngine shutdown.");
 
 		shutdownClientIO();
 
-		MyLogger.log(Level.INFO, "FireEngineMain: Finished FireEngine shutdown.");
+		MyLogger.log(Level.INFO, "FireEngineTelnetMain: Finished FireEngine shutdown.");
 	}
 
 	/**
@@ -203,22 +210,22 @@ public class FireEngineMain {
 		timerCount = 0;
 //		while (Session.numSessions() > 0) {
 //			if (timerCount > 50) {
-//				MyLogger.log(Level.WARNING, "FireEngineMain: Sessions took longer then 5 seconds to close.");
+//				MyLogger.log(Level.WARNING, "FireEngineTelnetMain: Sessions took longer then 5 seconds to close.");
 //			}
 //			try {
 //				Thread.sleep(100);
 //			} catch (InterruptedException e) {
-//				MyLogger.log(Level.WARNING, "FireEngineMain: InterruptedException while waiting for Sessions to close.",
+//				MyLogger.log(Level.WARNING, "FireEngineTelnetMain: InterruptedException while waiting for Sessions to close.",
 //						e);
 //			}
 //			timerCount += 1;
 //		}
 //		if (Session.numSessions() > 0) {
-//			MyLogger.log(Level.WARNING, "FireEngineMain: Not all Sessions closed gracefully, force closing.");
+//			MyLogger.log(Level.WARNING, "FireEngineTelnetMain: Not all Sessions closed gracefully, force closing.");
 //			Session.closeSessions();
-//			MyLogger.log(Level.INFO, "FireEngineMain: Finished force closing Sessions.");
+//			MyLogger.log(Level.INFO, "FireEngineTelnetMain: Finished force closing Sessions.");
 //		}
-		MyLogger.log(Level.INFO, "FireEngineMain: Finished closing Sessions.");
+		MyLogger.log(Level.INFO, "FireEngineTelnetMain: Finished closing Sessions.");
 
 		if (telnet != null) {
 			telnet.stopRunning();
@@ -226,20 +233,20 @@ public class FireEngineMain {
 			while (telnet.isAlive()) {
 				if (timerCount > 50) {
 					MyLogger.log(Level.WARNING,
-							"FireEngineMain: ClientIOTelnet thread took longer then 5 seconds to shutdown.");
+							"FireEngineTelnetMain: ClientIOTelnet thread took longer then 5 seconds to shutdown.");
 					break;
 				}
 				try {
 					Thread.sleep(100);
 				} catch (InterruptedException e) {
 					MyLogger.log(Level.WARNING,
-							"FireEngineMain: InterruptedException while waiting for ClientIOTelnet to shutdown.", e);
+							"FireEngineTelnetMain: InterruptedException while waiting for ClientIOTelnet to shutdown.", e);
 				}
 				timerCount += 1;
 			}
 			if (telnet.isAlive()) {
 				MyLogger.log(Level.WARNING,
-						"FireEngineMain: ClientIOTelnet thread did not shutdown, continuing anyway.");
+						"FireEngineTelnetMain: ClientIOTelnet thread did not shutdown, continuing anyway.");
 			}
 		}
 	}
@@ -248,7 +255,7 @@ public class FireEngineMain {
 	// * Post shutdown cleanup of IO related stuff.
 	// */
 	// private static void cleanUpClientIO() {
-	// MyLogger.log(Level.INFO, "FireEngineMain: Cleaning up Client IO....");
-	// MyLogger.log(Level.INFO, "FireEngineMain: Finished cleaning up Client IO.");
+	// MyLogger.log(Level.INFO, "FireEngineTelnetMain: Cleaning up Client IO....");
+	// MyLogger.log(Level.INFO, "FireEngineTelnetMain: Finished cleaning up Client IO.");
 	// }
 }

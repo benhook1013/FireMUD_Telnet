@@ -5,18 +5,18 @@ package fireengine_telnet.main;
  *
  * @author Ben Hook
  */
-public class FireEngineMainSetupException extends Exception {
+public class FireEngineSetupException extends Exception {
 	private static final long serialVersionUID = 1L;
 
-	public FireEngineMainSetupException(String message) {
+	public FireEngineSetupException(String message) {
 		super(message);
 	}
 
-	public FireEngineMainSetupException(Throwable throwable) {
+	public FireEngineSetupException(Throwable throwable) {
 		super(throwable);
 	}
 
-	public FireEngineMainSetupException(String message, Throwable throwable) {
+	public FireEngineSetupException(String message, Throwable throwable) {
 		super(message, throwable);
 	}
 }

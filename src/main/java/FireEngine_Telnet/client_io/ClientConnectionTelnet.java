@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 
 import fireengine_telnet.client_io.exception.ClientConnectionException;
-import fireengine_telnet.main.FireEngineMain;
+import fireengine_telnet.main.FireEngineTelnetMain;
 import fireengine_telnet.util.MyLogger;
 
 public class ClientConnectionTelnet implements ClientConnectionInterface {
@@ -365,7 +365,7 @@ public class ClientConnectionTelnet implements ClientConnectionInterface {
 	 */
 	public void readToConnection(String string) {
 		synchronized (this) {
-			if (string.length() > FireEngineMain.CLIENT_IO_INPUT_MAX_LENGTH) {
+			if (string.length() > FireEngineTelnetMain.CLIENT_IO_INPUT_MAX_LENGTH) {
 				MyLogger.log(Level.WARNING,
 						"ClientConnectionTelnet: Input recieved exceeded maximum input length; input dropped.");
 				return;
