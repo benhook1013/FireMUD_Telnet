@@ -33,7 +33,9 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-mainClassName = 'fireengine_telnet.main.FireEngineMain'
-run {
-    args = ['/src/main/resources']
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'fireengine_telnet.main.FireEngineMain'
+    }
 }
