@@ -57,11 +57,10 @@ public class FireEngineMain {
 
 	/**
 	 * Setup the world and start accepting connections.
-	 *
-	 * @throws Exception general {@link Exception} catching to allow for logging and
-	 *                   purposeful shutdown.
+	 * 
+	 * @throws FireEngineMainSetupException
 	 */
-	private static void setUp() throws Exception {
+	private static void setUp() throws FireEngineMainSetupException {
 		try {
 			ConfigLoader.loadSettings(configFilePath);
 		} catch (IOException e) {
@@ -70,12 +69,24 @@ public class FireEngineMain {
 
 		MyLogger.log(Level.INFO, "FireEngineMain: Bootstrapping FireEngine!");
 
+		serverName = "";
 		serverName = ConfigLoader.getSetting("serverName");
+		if (serverName.equals("")) {
+			throw new FireEngineMainSetupException(
+					String.format("FireEngineMain: No property found in config file for: %s", "serverName"));
+		}
+		telnetAddress = "";
 		telnetAddress = ConfigLoader.getSetting("serverIP");
+		if (telnetAddress.equals("")) {
+			throw new FireEngineMainSetupException(
+					String.format("FireEngineMain: No property found in config file for: %s", "serverIP"));
+		}
+		telnetPort = 0;
 		telnetPort = Integer.parseInt(ConfigLoader.getSetting("telnetPort"));
-
-		MyLogger.log(Level.INFO, "FireEngineMain: Setting up GameWorld");
-//		GameWorld.setupGameworld();
+		if (telnetPort == 0) {
+			throw new FireEngineMainSetupException(
+					String.format("FireEngineMain: No property found in config file for: %s", "telnetPort"));
+		}
 
 		startClientIOTelnet();
 	}

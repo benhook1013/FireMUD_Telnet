@@ -9,6 +9,8 @@ import java.util.logging.Level;
 
 /**
  * A class to load settings from text (.properties) file.
+ * 
+ * Returns empty string when no setting found for easy of null handling.
  *
  * @author Ben Hook
  */
@@ -40,7 +42,17 @@ public class ConfigLoader {
 		configFileInputStream.close();
 	}
 
+	/**
+	 * Returns empty string when no setting found for easy of null handling.
+	 * 
+	 * @param name
+	 * @return Setting in String format, empty String if not found or blank in file.
+	 */
 	public static String getSetting(String name) {
+		String setting = config.getProperty(name);
+		if (setting == null) {
+			setting = "";
+		}
 		return config.getProperty(name);
 	}
 }
