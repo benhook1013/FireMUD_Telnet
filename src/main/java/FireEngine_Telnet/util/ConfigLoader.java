@@ -53,6 +53,6 @@ public class ConfigLoader {
 		if (setting == null) {
 			setting = "";
 		}
-		return config.getProperty(name);
+		return setting;
 	}
 }
