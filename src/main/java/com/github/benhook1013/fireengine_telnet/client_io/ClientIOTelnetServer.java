@@ -1,4 +1,4 @@
-package fireengine_telnet.client_io;
+package com.github.benhook1013.fireengine_telnet.client_io;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -12,18 +12,20 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Level;
 
-import fireengine_telnet.client_io.exception.ClientIOTelnetException;
-import fireengine_telnet.util.MyLogger;
+import org.apache.logging.log4j.Level;
+
+import com.github.benhook1013.fireengine_telnet.client_io.exception.ClientIOTelnetException;
+import com.github.benhook1013.fireengine_telnet.util.FireEngineLogger;
 
 /**
  * Workhorse of the Telnet IO, a single thread that scales extremely well and
- * should be able to serve thousands of connections.
+ * should be able to serve thousands of connections (if implemented properly -
+ * to be seen).
  *
- * @author Ben Hook
+ * @author github.com/benhook1013
  */
-public class ClientIOTelnet extends Thread {
+public class ClientIOTelnetServer extends Thread {
 	private String address;
 	private int port;
 	private Selector sel;
@@ -39,7 +41,7 @@ public class ClientIOTelnet extends Thread {
 	 * A small class used to contain info about pending {@link SelectionKey}
 	 * changes.
 	 *
-	 * @author Ben Hook
+	 * @author github.com/benhook1013
 	 */
 	private class SelectItem {
 		private ClientConnectionTelnet ccon;
@@ -60,23 +62,23 @@ public class ClientIOTelnet extends Thread {
 	}
 
 	/**
-	 * Constructor for ClientIOTelnet
+	 * Constructor for ClientIOTelnetServer
 	 * 
 	 * @param address IP address for IO thread to listen on
 	 * @param port    port for IO thread to listen on
 	 * @throws ClientIOTelnetException exception thrown on thread setup
 	 */
-	public ClientIOTelnet(String address, int port) throws ClientIOTelnetException {
+	public ClientIOTelnetServer(String address, int port) throws ClientIOTelnetException {
 		this.address = address;
 		this.port = port;
 
-		MyLogger.log(Level.INFO, "ClientIOTelnet: Instantiating ClientIOTelnet...");
+		FireEngineLogger.log(Level.INFO, "ClientIOTelnetServer: Instantiating ClientIOTelnetServer...");
 		keyList = Collections.synchronizedList(new LinkedList<SelectItem>());
 		try {
 			sel = initSelector();
 		} catch (ClientIOTelnetException e) {
 			throw new ClientIOTelnetException(
-					"ClientIOTelnet: Failed to initialise Selector while instantiating ClientIOTelnet.", e);
+					"ClientIOTelnetServer: Failed to initialise Selector while instantiating ClientIOTelnetServer.", e);
 		}
 	}
 
@@ -102,7 +104,8 @@ public class ClientIOTelnet extends Thread {
 			// New Selector provided by OS.
 			sel = Selector.open();
 		} catch (IOException e) {
-			throw new ClientIOTelnetException("ClientIOTelnet: ClientIOTelnet: Failed to open selector.", e);
+			throw new ClientIOTelnetException("ClientIOTelnetServer: ClientIOTelnetServer: Failed to open selector.",
+					e);
 		}
 
 		try {
@@ -113,10 +116,10 @@ public class ClientIOTelnet extends Thread {
 				sel.close();
 			} catch (IOException e2) {
 				throw new ClientIOTelnetException(
-						"ClientIOTelnet: Failed to close Selector while failed to open server ServerSocketChannel.",
+						"ClientIOTelnetServer: Failed to close Selector while failed to open server ServerSocketChannel.",
 						e2);
 			}
-			throw new ClientIOTelnetException("ClientIOTelnet: Failed to open server ServerSocketChannel.", e);
+			throw new ClientIOTelnetException("ClientIOTelnetServer: Failed to open server ServerSocketChannel.", e);
 		}
 
 		try {
@@ -127,14 +130,14 @@ public class ClientIOTelnet extends Thread {
 				sel.close();
 			} catch (IOException e2) {
 				throw new ClientIOTelnetException(
-						"ClientIOTelnet: Failed to close Selector while failed to configure blocking on server ServerSocketChannel.",
+						"ClientIOTelnetServer: Failed to close Selector while failed to configure blocking on server ServerSocketChannel.",
 						e2);
 			}
 			try {
 				ssc.close();
 			} catch (IOException e3) {
 				throw new ClientIOTelnetException(
-						"ClientIOTelnet: Failed to close server ServerSocketChannel while failed to configure blocking on server ServerSocketChannel.",
+						"ClientIOTelnetServer: Failed to close server ServerSocketChannel while failed to configure blocking on server ServerSocketChannel.",
 						e3);
 			}
 			throw new ClientIOTelnetException("Failed to configure blocking on server ServerSocketChannel.", e);
@@ -148,20 +151,24 @@ public class ClientIOTelnet extends Thread {
 				sel.close();
 			} catch (IOException e2) {
 				throw new ClientIOTelnetException(
-						"ClientIOTelnet: Failed to close Selector while failed to bind address and socket to server ServerSocketChannel.",
+						"ClientIOTelnetServer: Failed to close Selector while failed to bind address and socket to server ServerSocketChannel.",
 						e2);
 			}
 			try {
 				ssc.close();
 			} catch (IOException e3) {
 				throw new ClientIOTelnetException(
-						"ClientIOTelnet: Failed to close server ServerSocketChannel while failed to bind address and socket to server ServerSocketChannel.",
+						"ClientIOTelnetServer: Failed to close server ServerSocketChannel while failed to bind address and socket to server ServerSocketChannel.",
 						e3);
 			}
 			throw new ClientIOTelnetException(
-					"ClientIOTelnet: Failed to bind address and socket to server ServerSocketChannel.", e);
+					"ClientIOTelnetServer: Failed to bind address and socket to server ServerSocketChannel.", e);
 		}
 
+		FireEngineLogger.log(Level.INFO,
+				"ClientIOTelnetServer: Successfully configured server socketchannel connection and bound to IP+port.");
+
+		FireEngineLogger.log(Level.INFO, "ClientIOTelnetServer: Registering server socketchannel with ACCEPT key.");
 		try {
 			ssc.register(sel, SelectionKey.OP_ACCEPT, null);
 		} catch (ClosedChannelException e) {
@@ -169,17 +176,18 @@ public class ClientIOTelnet extends Thread {
 				sel.close();
 			} catch (IOException e2) {
 				throw new ClientIOTelnetException(
-						"ClientIOTelnet: Failed to close Selector while failed to register server ServerSocketChannel.",
+						"ClientIOTelnetServer: Failed to close Selector while failed to register server ServerSocketChannel.",
 						e2);
 			}
 			try {
 				ssc.close();
 			} catch (IOException e3) {
 				throw new ClientIOTelnetException(
-						"ClientIOTelnet: Failed to close server ServerSocketChannel while failed to register server ServerSocketChannel.",
+						"ClientIOTelnetServer: Failed to close server ServerSocketChannel while failed to register server ServerSocketChannel.",
 						e3);
 			}
-			throw new ClientIOTelnetException("ClientIOTelnet: Failed to register server ServerSocketChannel.", e);
+			throw new ClientIOTelnetException("ClientIOTelnetServer: Failed to register server ServerSocketChannel.",
+					e);
 		}
 
 		return sel;
@@ -191,12 +199,12 @@ public class ClientIOTelnet extends Thread {
 	 */
 	@Override
 	public void run() {
-		MyLogger.log(Level.INFO, "ClientIOTelnet: Starting ClientIOTelnet.");
+		FireEngineLogger.log(Level.INFO, "ClientIOTelnetServer: Running ClientIOTelnetServer.");
 		int numSelected = 0;
 
 		running = true;
 		while (running) {
-			// MyLogger.log(Level.INFO, "Running ClientIOTelnet loop.");
+			FireEngineLogger.log(Level.TRACE, "Running ClientIOTelnetServer loop.");
 
 			try {
 				numSelected = sel.select();
@@ -204,21 +212,21 @@ public class ClientIOTelnet extends Thread {
 				try {
 					sel.close();
 				} catch (IOException e2) {
-					MyLogger.log(Level.SEVERE,
-							"ClientIOTelnet: Failed to close Selector while failed to select on Selector.", e2);
+					FireEngineLogger.log(Level.ERROR,
+							"ClientIOTelnetServer: Failed to close Selector while failed to select on Selector.", e2);
 					stopRunning();
 					break;
 				}
 				try {
 					ssc.close();
 				} catch (IOException e3) {
-					MyLogger.log(Level.SEVERE,
-							"ClientIOTelnet: Failed to close server ServerSocketChannel while failed to select on Selector.",
+					FireEngineLogger.log(Level.ERROR,
+							"ClientIOTelnetServer: Failed to close server ServerSocketChannel while failed to select on Selector.",
 							e3);
 					stopRunning();
 					break;
 				}
-				MyLogger.log(Level.SEVERE, "ClientIOTelnet: Failed to select on Selector.", e);
+				FireEngineLogger.log(Level.ERROR, "ClientIOTelnetServer: Failed to select on Selector.", e);
 				stopRunning();
 				break;
 			}
@@ -229,7 +237,7 @@ public class ClientIOTelnet extends Thread {
 				break;
 			}
 
-//			MyLogger.log(Level.INFO, "SELECTED: " + numSelected);
+//			FireEngineLogger.log(Level.INFO, "SELECTED: " + numSelected);
 
 			Iterator<SelectionKey> selIter = sel.selectedKeys().iterator();
 
@@ -259,7 +267,7 @@ public class ClientIOTelnet extends Thread {
 				// Selector's select() function is blocking.
 				if (numSelected == 0) {
 					if (keyList.isEmpty()) {
-						MyLogger.log(Level.FINE, "ClientIOTelnet: Selected 0.");
+						FireEngineLogger.log(Level.TRACE, "ClientIOTelnetServer: Selected 0.");
 					}
 				}
 
@@ -271,27 +279,27 @@ public class ClientIOTelnet extends Thread {
 						try {
 							item.getCcon().getSc().close();
 						} catch (IOException e) {
-							MyLogger.log(Level.SEVERE,
-									"ClientIOTelnet: Failed to close disconnected SocketChannel on closed keyList item.",
+							FireEngineLogger.log(Level.ERROR,
+									"ClientIOTelnetServer: Failed to close disconnected SocketChannel on closed keyList item.",
 									e);
 						}
 						continue;
 					}
 
 //					if (item.key == SelectionKey.OP_READ) {
-//						MyLogger.log(Level.INFO, "Registering for READ " + Thread.currentThread().getName());
+//						FireEngineLogger.log(Level.INFO, "Registering for READ " + Thread.currentThread().getName());
 //					} else if (item.key == SelectionKey.OP_WRITE) {
-//						MyLogger.log(Level.INFO, "Registering for WRITE " + Thread.currentThread().getName());
+//						FireEngineLogger.log(Level.INFO, "Registering for WRITE " + Thread.currentThread().getName());
 //					} else if (item.key == 0) {
-//						MyLogger.log(Level.INFO, "Registering for NONE " + Thread.currentThread().getName());
+//						FireEngineLogger.log(Level.INFO, "Registering for NONE " + Thread.currentThread().getName());
 //					}
 					SelectionKey foundKey = item.getCcon().getSc().keyFor(this.sel);
 					if (foundKey == null) {
 						try {
 							item.getCcon().getSc().register(this.sel, item.key, item.getCcon());
 						} catch (ClosedChannelException e) {
-							MyLogger.log(Level.INFO, "ClientIOTelnet: Tried to register Selector on closed channel.",
-									e);
+							FireEngineLogger.log(Level.INFO,
+									"ClientIOTelnetServer: Tried to register Selector on closed channel.", e);
 						}
 					} else {
 						foundKey.interestOps(item.key);
@@ -300,9 +308,9 @@ public class ClientIOTelnet extends Thread {
 			}
 		}
 
-		MyLogger.log(Level.INFO, "ClientIOTelnet: Initiating Telnet_IO shutdown.");
+		FireEngineLogger.log(Level.INFO, "ClientIOTelnetServer: Initiating Telnet_IO shutdown.");
 		clearResources();
-		MyLogger.log(Level.INFO, "ClientIOTelnet: Gracefully closed Telnet_IO.");
+		FireEngineLogger.log(Level.INFO, "ClientIOTelnetServer: Gracefully closed Telnet_IO.");
 	}
 
 	/**
@@ -315,7 +323,7 @@ public class ClientIOTelnet extends Thread {
 	 */
 	private void accept(SelectionKey key) {
 		if (!accepting) {
-			MyLogger.log(Level.WARNING, "ClientIOTelnet: Refusing accept on new connection.");
+			FireEngineLogger.log(Level.WARN, "ClientIOTelnetServer: Refusing accept on new connection.");
 			return;
 		}
 
@@ -326,7 +334,7 @@ public class ClientIOTelnet extends Thread {
 			// allow accepting of new network connections.
 			sc = ((ServerSocketChannel) key.channel()).accept();
 		} catch (IOException e) {
-			MyLogger.log(Level.WARNING, "ClientIOTelnet: Failed to accept new client SocketChannel.", e);
+			FireEngineLogger.log(Level.WARN, "ClientIOTelnetServer: Failed to accept new client SocketChannel.", e);
 			return;
 		}
 
@@ -335,16 +343,19 @@ public class ClientIOTelnet extends Thread {
 			// NIO requires.
 			sc.configureBlocking(false);
 		} catch (IOException e) {
-			MyLogger.log(Level.WARNING, "ClientIOTelnet: Failed to configure blocking on client SocketChannel.", e);
+			FireEngineLogger.log(Level.WARN, "ClientIOTelnetServer: Failed to configure blocking on client SocketChannel.", e);
 			try {
 				sc.close();
 			} catch (IOException e2) {
-				MyLogger.log(Level.WARNING,
-						"ClientIOTelnet: Failed to close client SocketChannel while failed to configure blocking on client SocketChannel.",
+				FireEngineLogger.log(Level.WARN,
+						"ClientIOTelnetServer: Failed to close client SocketChannel while failed to configure blocking on client SocketChannel.",
 						e2);
 			}
 			return;
 		}
+
+		FireEngineLogger.log(Level.INFO, "ClientIOTelnetServer: Accepted new client connection.");
+		new ClientConnectionTelnet(this, sc);
 //		new Session(new ClientConnectionTelnet(this, sc));
 	}
 
@@ -354,8 +365,7 @@ public class ClientIOTelnet extends Thread {
 	 * @param key the SelectionKey that is ready to read new client input from
 	 */
 	private void read(SelectionKey key) {
-		// Number of reads, returned by the read operation.
-		int numRead;
+		int numRead; // Number of reads, returned by the read operation.
 		while (true) {
 			// Clear buffer so its ready for new data.
 			readBuffer.clear();
@@ -364,7 +374,7 @@ public class ClientIOTelnet extends Thread {
 				readBuffer.flip();
 			} catch (IOException e) {
 				// Client connection was shutdown remotely, abruptly.
-				MyLogger.log(Level.WARNING, "ClientIOTelnet: Failed to read from SocketChannel to ByteBuffer.", e);
+				FireEngineLogger.log(Level.WARN, "ClientIOTelnetServer: Failed to read from SocketChannel to ByteBuffer.", e);
 				key.cancel();
 				((ClientConnectionTelnet) key.attachment()).close();
 				return;
@@ -405,7 +415,7 @@ public class ClientIOTelnet extends Thread {
 					((SocketChannel) key.channel()).write(buff);
 				} catch (IOException e) {
 					ccon.finishedWrite();
-					MyLogger.log(Level.WARNING, "ClientIOTelnet: Failed to write to SocketChannel.", e);
+					FireEngineLogger.log(Level.WARN, "ClientIOTelnetServer: Failed to write to SocketChannel.", e);
 				}
 				// SocketChannel's internal buffer is full. The break prevents loss of client
 				// output as will wait for SocketChannel to be ready for writing again, to try
@@ -432,22 +442,22 @@ public class ClientIOTelnet extends Thread {
 				if (ccon == selItem.getCcon()) {
 					if (selItem.getKey() == SelectionKey.OP_READ) {
 						if (key == SelectionKey.OP_READ) {
-							MyLogger.log(Level.FINER, "Ignoring queue for READ when already queue for READ.");
+							FireEngineLogger.log(Level.TRACE, "Ignoring queue for READ when already queue for READ.");
 							return;
 						} else if (key == SelectionKey.OP_WRITE) {
 							// READ is default state, allow queue for WRITE as that indicated we have
 							// something to send.
-							MyLogger.log(Level.FINER, "Allowing queue for WRITE when already queue for READ.");
+							FireEngineLogger.log(Level.TRACE, "Allowing queue for WRITE when already queue for READ.");
 							break;
 						}
 					} else if (selItem.getKey() == SelectionKey.OP_WRITE) {
 						if (key == SelectionKey.OP_READ) {
 							// If already queued for WRITE, means we should have something to send, which
 							// upon finished sending, will automatically queue for READ.
-							MyLogger.log(Level.FINER, "Ignoring queue for READ when already queue for WRITE.");
+							FireEngineLogger.log(Level.TRACE, "Ignoring queue for READ when already queue for WRITE.");
 							return;
 						} else if (key == SelectionKey.OP_WRITE) {
-							MyLogger.log(Level.FINER, "Ignoring queue for WRITE when already queue for WRITE.");
+							FireEngineLogger.log(Level.TRACE, "Ignoring queue for WRITE when already queue for WRITE.");
 							return;
 						}
 					}
@@ -456,10 +466,10 @@ public class ClientIOTelnet extends Thread {
 			}
 
 //			if (key == SelectionKey.OP_READ) {
-//				MyLogger.log(Level.INFO,
+//				FireEngineLogger.log(Level.INFO,
 //						"Queueing key for READ " + Thread.currentThread().getName() + ", wakeUp is: " + wakeUp);
 //			} else if (key == SelectionKey.OP_WRITE) {
-//				MyLogger.log(Level.INFO,
+//				FireEngineLogger.log(Level.INFO,
 //						"Queueing key for WRITE " + Thread.currentThread().getName() + ", wakeUp is: " + wakeUp);
 //			}
 			keyList.add(new SelectItem(ccon, key));
@@ -486,9 +496,9 @@ public class ClientIOTelnet extends Thread {
 		if ((this.ssc != null) && this.ssc.isOpen()) {
 			try {
 				ssc.close();
-				MyLogger.log(Level.INFO, "ClientIOTelnet: Shutdown ServerSocketChannel.");
+				FireEngineLogger.log(Level.INFO, "ClientIOTelnetServer: Shutdown ServerSocketChannel.");
 			} catch (IOException e) {
-				MyLogger.log(Level.WARNING, "ClientIOTelnet: IOException while closing ServerSocketChannel.", e);
+				FireEngineLogger.log(Level.WARN, "ClientIOTelnetServer: IOException while closing ServerSocketChannel.", e);
 			}
 		}
 
@@ -511,7 +521,7 @@ public class ClientIOTelnet extends Thread {
 		try {
 			sel.close();
 		} catch (IOException e) {
-			MyLogger.log(Level.WARNING, "ClientIOTelnet: IOException while closing Selector.", e);
+			FireEngineLogger.log(Level.WARN, "ClientIOTelnetServer: IOException while closing Selector.", e);
 		}
 	}
 }

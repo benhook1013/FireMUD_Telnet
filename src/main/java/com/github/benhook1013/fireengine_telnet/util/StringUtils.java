@@ -1,9 +1,9 @@
-package fireengine_telnet.util;
+package com.github.benhook1013.fireengine_telnet.util;
 
 /**
  * Class containing custom/toolbox type String related functions.
  *
- * @author Ben Hook
+ * @author github.com/benhook1013
  */
 public abstract class StringUtils {
 	// TODO clean, trim etc

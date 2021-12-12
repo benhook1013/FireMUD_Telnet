@@ -1,13 +1,13 @@
-package fireengine_telnet.client_io;
+package com.github.benhook1013.fireengine_telnet.client_io;
 
-import fireengine_telnet.client_io.exception.ClientConnectionException;
+import com.github.benhook1013.fireengine_telnet.client_io.exception.ClientConnectionException;
 
 /**
  * Interface for client IO/connection. Depending on implementation, may be
- * backed by other classes (such as {@link ClientIOTelnet} for Telnet's
+ * backed by other classes (such as {@link ClientIOTelnetServer} for Telnet's
  * {@link ClientConnectionTelnet}).
  *
- * @author Ben Hook
+ * @author github.com/benhook1013
  */
 public interface ClientConnectionInterface {
 	/**

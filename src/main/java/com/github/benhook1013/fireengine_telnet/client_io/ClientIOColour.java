@@ -1,4 +1,4 @@
-package fireengine_telnet.client_io;
+package com.github.benhook1013.fireengine_telnet.client_io;
 
 // Mock-static class.
 public final class ClientIOColour {

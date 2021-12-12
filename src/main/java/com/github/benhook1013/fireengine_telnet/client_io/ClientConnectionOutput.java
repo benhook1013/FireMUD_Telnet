@@ -1,4 +1,4 @@
-package fireengine_telnet.client_io;
+package com.github.benhook1013.fireengine_telnet.client_io;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,7 +10,7 @@ import java.util.Iterator;
  * line parts (including blank lines), with each part containing text,
  * foreground colour and background colour(colours optional).
  *
- * @author Ben Hook
+ * @author github.com/benhook1013
  */
 public class ClientConnectionOutput {
 	private ArrayList<Client_Connection_Output_Line> lineList;
@@ -172,7 +172,7 @@ public class ClientConnectionOutput {
 				while (iter.hasNext()) {
 					Client_Connection_Output_Line line = iter.next();
 					Collections.reverse(line.partList);
-					for (fireengine_telnet.client_io.ClientConnectionOutput.Client_Connection_Output_Line.Client_Connection_Output_Part part : line
+					for (ClientConnectionOutput.Client_Connection_Output_Line.Client_Connection_Output_Part part : line
 							.getParts()) {
 						this.addPart(part.getText(), part.getColourFG(), part.getColourBG(), true);
 					}
@@ -184,7 +184,7 @@ public class ClientConnectionOutput {
 				Iterator<Client_Connection_Output_Line> iter = copyOutput.lineList.iterator();
 				while (iter.hasNext()) {
 					Client_Connection_Output_Line line = iter.next();
-					for (fireengine_telnet.client_io.ClientConnectionOutput.Client_Connection_Output_Line.Client_Connection_Output_Part part : line
+					for (ClientConnectionOutput.Client_Connection_Output_Line.Client_Connection_Output_Part part : line
 							.getParts()) {
 						this.addPart(part.getText(), part.getColourFG(), part.getColourBG());
 					}
@@ -293,7 +293,7 @@ public class ClientConnectionOutput {
 	/**
 	 *
 	 *
-	 * @author Ben Hook
+	 * @author github.com/benhook1013
 	 */
 	private class Client_Connection_Output_Line {
 		private ArrayList<Client_Connection_Output_Part> partList;

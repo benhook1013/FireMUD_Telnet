@@ -1,4 +1,4 @@
-package fireengine_telnet.client_io.exception;
+package com.github.benhook1013.fireengine_telnet.client_io.exception;
 
 import java.io.IOException;
 

@@ -1,4 +1,4 @@
-package fireengine_telnet.client_io;
+package com.github.benhook1013.fireengine_telnet.client_io;
 
 import java.io.IOException;
 import java.net.StandardSocketOptions;
@@ -6,15 +6,16 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
-import java.util.logging.Level;
 
-import fireengine_telnet.client_io.exception.ClientConnectionException;
-import fireengine_telnet.main.FireEngineTelnetMain;
-import fireengine_telnet.util.MyLogger;
+import org.apache.logging.log4j.Level;
+
+import com.github.benhook1013.fireengine_telnet.client_io.exception.ClientConnectionException;
+import com.github.benhook1013.fireengine_telnet.main.FireEngineTelnetMain;
+import com.github.benhook1013.fireengine_telnet.util.FireEngineLogger;
 
 public class ClientConnectionTelnet implements ClientConnectionInterface {
 	private ClientConnectionTelnet ccon;
-	private ClientIOTelnet telnet;
+	private ClientIOTelnetServer telnet;
 	private final SocketChannel sc;
 	private String address;
 
@@ -33,14 +34,21 @@ public class ClientConnectionTelnet implements ClientConnectionInterface {
 	private static final String colourReset = "\u001B[0m";
 	private static final String EOL = "\r\n";
 
-	public ClientConnectionTelnet(ClientIOTelnet telnet, SocketChannel sc) {
+	public ClientConnectionTelnet(ClientIOTelnetServer telnet, SocketChannel sc) {
 		synchronized (this) {
-			MyLogger.log(Level.INFO, "ClientConnectionTelnet: Telnet_IO_Connection created!");
+			FireEngineLogger.log(Level.TRACE, "ClientConnectionTelnet: ClientConnectionTelnet initialised.");
 			ccon = this;
 			this.telnet = telnet;
 			this.sc = sc;
 			acceptInput = false;
 			shutdown = false;
+
+			try {
+				setupConnection();
+			} catch (ClientConnectionException e) {
+				FireEngineLogger.log(Level.WARN, "ClientConnectionTelnet: Failed to setupConnection for client.", e);
+			}
+			acceptInput();
 		}
 	}
 
@@ -48,22 +56,23 @@ public class ClientConnectionTelnet implements ClientConnectionInterface {
 //	public void setupConnection(Session sess) throws ClientConnectionException {
 	public void setupConnection() throws ClientConnectionException {
 		synchronized (this) {
-//			this.sess = sess;
+			try {
+				this.address = ccon.sc.getLocalAddress().toString();
+			} catch (IOException e) {
+				FireEngineLogger.log(Level.WARN, "ClientConnectionTelnet: Failed to get address for SocketChannel.", e);
+				this.address = "error retrieving address";
+			}
 			try {
 				// Set SocketChannel flag to keep connections alive.
-				ccon.sc.setOption(StandardSocketOptions.SO_KEEPALIVE, true);
+				this.sc.setOption(StandardSocketOptions.SO_KEEPALIVE, true);
 			} catch (IOException e) {
 				throw new ClientConnectionException("ClientConnectionTelnet: Failed to set SO_KEEPALIVE.", e);
 			}
-			try {
-				ccon.address = ccon.sc.getLocalAddress().toString();
-			} catch (IOException e) {
-				MyLogger.log(Level.WARNING, "ClientConnectionTelnet: Failed to get address for SocketChannel.", e);
-				ccon.address = "error retrieving address";
-			}
-			ccon.sendList = new ArrayList<>();
-			ccon.recieveList = new ArrayList<>();
-			MyLogger.log(Level.INFO, "ClientConnectionTelnet: Telnet_IO_Connection set up: '" + address + "'.");
+			this.sendList = new ArrayList<>();
+			this.recieveList = new ArrayList<>();
+			FireEngineLogger.log(Level.INFO, String.format(
+					"ClientConnectionTelnet: ClientConnectionTelnet set up: '%s'. Registering for READ.", address));
+			telnet.addKeyQueue(ccon, SelectionKey.OP_READ, true);
 		}
 	}
 
@@ -73,7 +82,8 @@ public class ClientConnectionTelnet implements ClientConnectionInterface {
 
 	/**
 	 * Write output to ClientConnection from the game. To later be written from
-	 * ClientConnection to {@link ClientIOTelnet} with {@link #writeFromConnection}.
+	 * ClientConnection to {@link ClientIOTelnetServer} with
+	 * {@link #writeFromConnection}.
 	 */
 	@Override
 	public void writeToConnection(ClientConnectionOutput output, boolean ansi) {
@@ -120,7 +130,7 @@ public class ClientConnectionTelnet implements ClientConnectionInterface {
 
 			output.nextPart();
 		}
-		MyLogger.log(Level.FINE, "parseOutput output: '" + string + "'");
+		FireEngineLogger.log(Level.TRACE, "parseOutput output: '" + string + "'");
 		string = string + EOL;
 		return string;
 	}
@@ -215,7 +225,7 @@ public class ClientConnectionTelnet implements ClientConnectionInterface {
 				code = "30" + colourSeperator + "1";
 			} else {
 				code = "40";
-				MyLogger.log(Level.WARNING, "ClientConnectionTelnet: Tried to call Bright colour on Background.");
+				FireEngineLogger.log(Level.WARN, "ClientConnectionTelnet: Tried to call Bright colour on Background.");
 			}
 			break;
 		}
@@ -224,7 +234,7 @@ public class ClientConnectionTelnet implements ClientConnectionInterface {
 				code = "31" + colourSeperator + "1";
 			} else {
 				code = "41";
-				MyLogger.log(Level.WARNING, "ClientConnectionTelnet: Tried to call Bright colour on Background.");
+				FireEngineLogger.log(Level.WARN, "ClientConnectionTelnet: Tried to call Bright colour on Background.");
 			}
 			break;
 		}
@@ -233,7 +243,7 @@ public class ClientConnectionTelnet implements ClientConnectionInterface {
 				code = "32" + colourSeperator + "1";
 			} else {
 				code = "42";
-				MyLogger.log(Level.WARNING, "ClientConnectionTelnet: Tried to call Bright colour on Background.");
+				FireEngineLogger.log(Level.WARN, "ClientConnectionTelnet: Tried to call Bright colour on Background.");
 			}
 			break;
 		}
@@ -242,7 +252,7 @@ public class ClientConnectionTelnet implements ClientConnectionInterface {
 				code = "33" + colourSeperator + "1";
 			} else {
 				code = "43";
-				MyLogger.log(Level.WARNING, "ClientConnectionTelnet: Tried to call Bright colour on Background.");
+				FireEngineLogger.log(Level.WARN, "ClientConnectionTelnet: Tried to call Bright colour on Background.");
 			}
 			break;
 		}
@@ -251,7 +261,7 @@ public class ClientConnectionTelnet implements ClientConnectionInterface {
 				code = "34" + colourSeperator + "1";
 			} else {
 				code = "44";
-				MyLogger.log(Level.WARNING, "ClientConnectionTelnet: Tried to call Bright colour on Background.");
+				FireEngineLogger.log(Level.WARN, "ClientConnectionTelnet: Tried to call Bright colour on Background.");
 			}
 			break;
 		}
@@ -260,7 +270,7 @@ public class ClientConnectionTelnet implements ClientConnectionInterface {
 				code = "35" + colourSeperator + "1";
 			} else {
 				code = "45";
-				MyLogger.log(Level.WARNING, "ClientConnectionTelnet: Tried to call Bright colour on Background.");
+				FireEngineLogger.log(Level.WARN, "ClientConnectionTelnet: Tried to call Bright colour on Background.");
 			}
 			break;
 		}
@@ -269,7 +279,7 @@ public class ClientConnectionTelnet implements ClientConnectionInterface {
 				code = "36" + colourSeperator + "1";
 			} else {
 				code = "46";
-				MyLogger.log(Level.WARNING, "ClientConnectionTelnet: Tried to call Bright colour on Background.");
+				FireEngineLogger.log(Level.WARN, "ClientConnectionTelnet: Tried to call Bright colour on Background.");
 			}
 			break;
 		}
@@ -278,7 +288,7 @@ public class ClientConnectionTelnet implements ClientConnectionInterface {
 				code = "37" + colourSeperator + "1";
 			} else {
 				code = "47";
-				MyLogger.log(Level.WARNING, "ClientConnectionTelnet: Tried to call Bright colour on Background.");
+				FireEngineLogger.log(Level.WARN, "ClientConnectionTelnet: Tried to call Bright colour on Background.");
 			}
 			break;
 		}
@@ -288,7 +298,7 @@ public class ClientConnectionTelnet implements ClientConnectionInterface {
 	}
 
 	/**
-	 * Called by {@link ClientIOTelnet} to get output to send to client.
+	 * Called by {@link ClientIOTelnetServer} to get output to send to client.
 	 * 
 	 * @return a {@link ByteBuffer} of the next line of output to send
 	 */
@@ -311,8 +321,8 @@ public class ClientConnectionTelnet implements ClientConnectionInterface {
 	}
 
 	/**
-	 * Used by {@link ClientIOTelnet} to indicated to ClientConnectionTelnet that
-	 * all bytes for current output line have been sent (as they may be sent in
+	 * Used by {@link ClientIOTelnetServer} to indicated to ClientConnectionTelnet
+	 * that all bytes for current output line have been sent (as they may be sent in
 	 * multiple chunks due to various layers' ByteBuffer sizes), so that the current
 	 * output can be removed from sendList.
 	 * 
@@ -357,7 +367,7 @@ public class ClientConnectionTelnet implements ClientConnectionInterface {
 	}
 
 	/**
-	 * Used by {@link ClientIOTelnet} indirectly from a inside
+	 * Used by {@link ClientIOTelnetServer} indirectly from a inside
 	 * {@link #readToConnectionPart}, to read in client input to
 	 * ClientConnectionTelnet.
 	 * 
@@ -366,7 +376,7 @@ public class ClientConnectionTelnet implements ClientConnectionInterface {
 	public void readToConnection(String string) {
 		synchronized (this) {
 			if (string.length() > FireEngineTelnetMain.CLIENT_IO_INPUT_MAX_LENGTH) {
-				MyLogger.log(Level.WARNING,
+				FireEngineLogger.log(Level.WARN,
 						"ClientConnectionTelnet: Input recieved exceeded maximum input length; input dropped.");
 				return;
 			}
@@ -374,7 +384,8 @@ public class ClientConnectionTelnet implements ClientConnectionInterface {
 			if (!acceptInput) {
 				return;
 			}
-			MyLogger.log(Level.FINE, "readToConnection: '" + string + "'");
+			FireEngineLogger.log(Level.TRACE, "readToConnection: '" + string + "'");
+			System.out.println("TEST readToConnection");
 			if (!(recieveList.size() >= RECIEVE_LIMIT)) {
 				recieveList.add(string);
 			}
@@ -384,12 +395,16 @@ public class ClientConnectionTelnet implements ClientConnectionInterface {
 	}
 
 	/**
-	 * Used by {@link ClientIOTelnet} to read input to ClientConnectionTelnet (char
-	 * by char) for combining and parsing.
+	 * Used by {@link ClientIOTelnetServer} to read input to ClientConnectionTelnet
+	 * (char by char) for combining and parsing.
+	 * 
+	 * #TODO Add limit on internal line buffer.
 	 * 
 	 * @param c char to be read in to ClientConnectionTelnet
 	 */
 	public void readToConnectionPart(char c) {
+		FireEngineLogger.log(Level.TRACE,
+				String.format("ClientConnectionTelnet: Read to connection char: %s", String.valueOf(c)));
 		synchronized (this) {
 			if ((c == '\r') | (c == '\n')) {
 
@@ -450,12 +465,12 @@ public class ClientConnectionTelnet implements ClientConnectionInterface {
 
 			if (sc.isOpen()) {
 				try {
-					MyLogger.log(Level.INFO, String.format(
+					FireEngineLogger.log(Level.INFO, String.format(
 							"ClientConnectionTelnet: ClientConnectionTelnet shutdown: '%s' (remote) connected to '%s' (local).",
 							sc.getRemoteAddress().toString(), sc.getLocalAddress().toString()));
 					sc.close();
 				} catch (IOException e) {
-					MyLogger.log(Level.WARNING,
+					FireEngineLogger.log(Level.WARN,
 							"ClientConnectionTelnet: IOException while trying to close ClientConnectionTelnet.", e);
 				}
 
