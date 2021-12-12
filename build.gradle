@@ -35,7 +35,7 @@ dependencies {
     //implementation 'com.google.guava:guava:30.1.1-jre'
 }
 
-mainClassName = "fireengine_telnet.main.FireEngineTelnetMain"
+mainClassName = "com.github.benhook1013.fireengine_telnet.main.FireEngineTelnetMain"
 
 tasks.named('test') {
     // Use JUnit Platform for unit tests.
@@ -44,14 +44,14 @@ tasks.named('test') {
 
 jar {
     manifest {
-        attributes 'Main-Class': 'fireengine_telnet.main.FireEngineTelnetMain'
+        attributes 'Main-Class': 'com.github.benhook1013.fireengine_telnet.main.FireEngineTelnetMain'
         attributes 'Multi-Release': 'true'
     }
 }
 
 shadowJar {
     manifest {
-        attributes 'Main-Class': 'fireengine_telnet.main.FireEngineTelnetMain'
+        attributes 'Main-Class': 'com.github.benhook1013.fireengine_telnet.main.FireEngineTelnetMain'
         attributes 'Multi-Release': 'true'
     }
 }
