@@ -13,6 +13,13 @@ import com.github.benhook1013.fireengine_telnet.client_io.exception.ClientConnec
 import com.github.benhook1013.fireengine_telnet.main.FireEngineTelnetMain;
 import com.github.benhook1013.fireengine_telnet.util.FireEngineLogger;
 
+/**
+ * #TODO Pretty sure when this prints IPs on connect/end, isn't 100%
+ * correct/similar.
+ * 
+ * @author github.com/benhook1013
+ *
+ */
 public class ClientConnectionTelnet implements ClientConnectionInterface {
 	private ClientConnectionTelnet ccon;
 	private ClientIOTelnetServer telnet;
@@ -36,12 +43,12 @@ public class ClientConnectionTelnet implements ClientConnectionInterface {
 
 	public ClientConnectionTelnet(ClientIOTelnetServer telnet, SocketChannel sc) {
 		synchronized (this) {
-			FireEngineLogger.log(Level.TRACE, "ClientConnectionTelnet: ClientConnectionTelnet initialised.");
 			ccon = this;
 			this.telnet = telnet;
 			this.sc = sc;
 			acceptInput = false;
 			shutdown = false;
+			FireEngineLogger.log(Level.TRACE, "ClientConnectionTelnet: ClientConnectionTelnet initialised.");
 
 			try {
 				setupConnection();
@@ -53,13 +60,13 @@ public class ClientConnectionTelnet implements ClientConnectionInterface {
 	}
 
 	@Override
-//	public void setupConnection(Session sess) throws ClientConnectionException {
 	public void setupConnection() throws ClientConnectionException {
 		synchronized (this) {
 			try {
-				this.address = ccon.sc.getLocalAddress().toString();
+				this.address = ccon.sc.getRemoteAddress().toString();
 			} catch (IOException e) {
-				FireEngineLogger.log(Level.WARN, "ClientConnectionTelnet: Failed to get address for SocketChannel.", e);
+				FireEngineLogger.log(Level.WARN,
+						"ClientConnectionTelnet: Failed to get remote address for SocketChannel.", e);
 				this.address = "error retrieving address";
 			}
 			try {

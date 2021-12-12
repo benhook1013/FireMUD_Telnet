@@ -343,7 +343,8 @@ public class ClientIOTelnetServer extends Thread {
 			// NIO requires.
 			sc.configureBlocking(false);
 		} catch (IOException e) {
-			FireEngineLogger.log(Level.WARN, "ClientIOTelnetServer: Failed to configure blocking on client SocketChannel.", e);
+			FireEngineLogger.log(Level.WARN,
+					"ClientIOTelnetServer: Failed to configure blocking on client SocketChannel.", e);
 			try {
 				sc.close();
 			} catch (IOException e2) {
@@ -374,7 +375,8 @@ public class ClientIOTelnetServer extends Thread {
 				readBuffer.flip();
 			} catch (IOException e) {
 				// Client connection was shutdown remotely, abruptly.
-				FireEngineLogger.log(Level.WARN, "ClientIOTelnetServer: Failed to read from SocketChannel to ByteBuffer.", e);
+				FireEngineLogger.log(Level.WARN,
+						"ClientIOTelnetServer: Failed to read from SocketChannel to ByteBuffer.", e);
 				key.cancel();
 				((ClientConnectionTelnet) key.attachment()).close();
 				return;
@@ -430,6 +432,9 @@ public class ClientIOTelnetServer extends Thread {
 
 	/**
 	 * Queue up changes to a SelectionKey for given connection.
+	 * 
+	 * #TODO Pretty sure this is supposed to bitwise combine the selection keys,
+	 * instead of overwriting, to allow multiple selections at a time.
 	 *
 	 * @param ccon   ClientConnectionTelnet to queue up the key change for
 	 * @param key    SelectionKey to set
@@ -498,7 +503,8 @@ public class ClientIOTelnetServer extends Thread {
 				ssc.close();
 				FireEngineLogger.log(Level.INFO, "ClientIOTelnetServer: Shutdown ServerSocketChannel.");
 			} catch (IOException e) {
-				FireEngineLogger.log(Level.WARN, "ClientIOTelnetServer: IOException while closing ServerSocketChannel.", e);
+				FireEngineLogger.log(Level.WARN, "ClientIOTelnetServer: IOException while closing ServerSocketChannel.",
+						e);
 			}
 		}
 
