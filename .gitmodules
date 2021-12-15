@@ -1,0 +1,4 @@
+[submodule "FireEngine_Lib"]
+	path = FireEngine_Lib
+	url = https://github.com/benhook1013/FireEngine_Lib.git
+	branch = main

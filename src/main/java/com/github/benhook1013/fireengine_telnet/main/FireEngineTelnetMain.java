@@ -131,7 +131,8 @@ public class FireEngineTelnetMain {
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
-				FireEngineLogger.log(Level.INFO, "FireEngineTelnetMain: Main thread running loop sleep interrupted.", e);
+				FireEngineLogger.log(Level.INFO, "FireEngineTelnetMain: Main thread running loop sleep interrupted.",
+						e);
 			}
 			// stop();
 			// break;
@@ -255,8 +256,10 @@ public class FireEngineTelnetMain {
 	// * Post shutdown cleanup of IO related stuff.
 	// */
 	// private static void cleanUpClientIO() {
-	// FireEngineLogger.log(Level.INFO, "FireEngineTelnetMain: Cleaning up Client IO....");
-	// FireEngineLogger.log(Level.INFO, "FireEngineTelnetMain: Finished cleaning up Client
+	// FireEngineLogger.log(Level.INFO, "FireEngineTelnetMain: Cleaning up Client
+	// IO....");
+	// FireEngineLogger.log(Level.INFO, "FireEngineTelnetMain: Finished cleaning up
+	// Client
 	// IO.");
 	// }
 }

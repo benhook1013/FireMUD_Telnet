@@ -8,4 +8,4 @@
  */
 
 rootProject.name = 'FireEngine_Telnet'
-//include('app')
+include 'FireEngine_Lib'
