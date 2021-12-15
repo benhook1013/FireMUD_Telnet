@@ -4,10 +4,10 @@ import java.io.IOException;
 
 import org.apache.logging.log4j.Level;
 
+import com.github.benhook1013.fireengine_lib.util.ConfigLoader;
+import com.github.benhook1013.fireengine_lib.util.FireEngineLogger;
 import com.github.benhook1013.fireengine_telnet.client_io.ClientIOTelnetServer;
 import com.github.benhook1013.fireengine_telnet.client_io.exception.ClientIOTelnetException;
-import com.github.benhook1013.fireengine_telnet.util.ConfigLoader;
-import com.github.benhook1013.fireengine_telnet.util.FireEngineLogger;
 
 /**
  * Main Thread; initiates, runs (and later, monitors) the various services.

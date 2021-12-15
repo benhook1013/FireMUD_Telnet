@@ -15,8 +15,8 @@ import java.util.List;
 
 import org.apache.logging.log4j.Level;
 
+import com.github.benhook1013.fireengine_lib.util.FireEngineLogger;
 import com.github.benhook1013.fireengine_telnet.client_io.exception.ClientIOTelnetException;
-import com.github.benhook1013.fireengine_telnet.util.FireEngineLogger;
 
 /**
  * Workhorse of the Telnet IO, a single thread that scales extremely well and

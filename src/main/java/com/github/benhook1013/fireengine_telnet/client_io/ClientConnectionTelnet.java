@@ -9,9 +9,9 @@ import java.util.ArrayList;
 
 import org.apache.logging.log4j.Level;
 
+import com.github.benhook1013.fireengine_lib.util.FireEngineLogger;
 import com.github.benhook1013.fireengine_telnet.client_io.exception.ClientConnectionException;
 import com.github.benhook1013.fireengine_telnet.main.FireEngineTelnetMain;
-import com.github.benhook1013.fireengine_telnet.util.FireEngineLogger;
 
 /**
  * #TODO Pretty sure when this prints IPs on connect/end, isn't 100%

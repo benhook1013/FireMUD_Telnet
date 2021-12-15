@@ -1,4 +1,4 @@
-package com.github.benhook1013.fireengine_telnet.util;
+package com.github.benhook1013.fireengine_lib.util;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Level;

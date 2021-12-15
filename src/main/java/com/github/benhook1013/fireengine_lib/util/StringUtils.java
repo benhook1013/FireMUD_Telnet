@@ -1,4 +1,4 @@
-package com.github.benhook1013.fireengine_telnet.util;
+package com.github.benhook1013.fireengine_lib.util;
 
 /**
  * Class containing custom/toolbox type String related functions.
